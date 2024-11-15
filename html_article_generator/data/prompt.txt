@@ -1,0 +1,12 @@
+Proszę, przekształć poniższy tekst artykułu na kod HTML, zachowując odpowiednią strukturę za pomocą tagów HTML.
+
+Wytyczne:
+- Wygenerowany kod HTML powinien zawierać tylko treść do umieszczenia wewnątrz tagów <body> i </body>.
+- Użyj tagów HTML <h1>, <h2>, <p>, i <ul> / <ol> dla poprawnej struktury, aby artykuł był czytelny i dobrze sformatowany.
+- W miejscach, gdzie warto dodać grafikę, dodaj tag <img> z atrybutem src="image_placeholder.jpg" oraz atrybutem alt, który zawiera prompt do wygenerowania obrazu.
+- Dodaj podpis pod każdym obrazem, używając tagu <figcaption> otoczonego znacznikiem <figure>.
+- Nie stosuj CSS ani JavaScript.
+- Wynikowy kod zapiszemy w pliku HTML, więc wygenerowany kod nie powinien zawierać tagów <html>, <head>, ani <body>.
+- Na początku kodu należy dodać {% block content %} a na końcu {% endblock %}, aby wskazać miejsce, w którym treść artykułu będzie wstawiana w ramach szablonu.
+
+Oto treść artykułu do konwersji:
