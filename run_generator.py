@@ -7,7 +7,7 @@ def main():
     parser.add_argument("-path", type=str, help="Name of the output template file", required=True)
     args = parser.parse_args()
 
-    output_path = args.name
+    output_path = args.path
 
     print(f"Output will be saved to: {output_path}")
 

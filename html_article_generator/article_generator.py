@@ -1,69 +1,111 @@
 import typing
-
 import openai
 from openai import OpenAI
-
 from .setup import PROMPT_PATH, ARTICLE_PATH, OPENAI_API_KEY, OUTPUT_PATH
 
 
 class ArticleHtmlGenerator:
     def __init__(self, open_ai_key: str = OPENAI_API_KEY, article_path: str = ARTICLE_PATH,
-                 output_path: str = OUTPUT_PATH,
-                 prompt_path: str = PROMPT_PATH) -> None:
+                 output_path: str = OUTPUT_PATH, prompt_path: str = PROMPT_PATH) -> None:
+        """
+        Initializes the ArticleHtmlGenerator with the provided paths and OpenAI API key.
+
+        :param open_ai_key: The OpenAI API key.
+        :param article_path: The file path to the article to be processed.
+        :param output_path: The file path where the generated HTML will be saved.
+        :param prompt_path: The file path for the prompt to prepend to the article text.
+        """
         self.open_ai_key = open_ai_key
         self.article_path = article_path
         self.output_path = output_path
         self.prompt_path = prompt_path
         openai.api_key = self.open_ai_key
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the ArticleHtmlGenerator instance.
+
+        :return: A formatted string with the article and output paths.
+        """
         return f"ArticleHtmlGenerator(article_path={self.article_path}, output_path={self.output_path}, prompt_path={self.prompt_path})"
 
-    def read_article(self) -> typing.Union[str, None]:
-        try:
-            with open(self.article_path, "r", encoding="utf-8") as article:
-                article_text = article.read()
-            return article_text
-        except FileNotFoundError:
-            print(f"Article file not found: {self.article_path}")
-            return None
+    def _read_file(self, file_path: str) -> typing.Union[str, None]:
+        """
+        Reads the contents of a file and returns the text, or None if an error occurs.
 
-    def read_prompt(self) -> typing.Union[str, None]:
+        :param file_path: Path to the file to read.
+        :return: The contents of the file or None if the file could not be read.
+        """
         try:
-            with open(self.prompt_path, "r", encoding="utf-8") as prompt:
-                prompt_text = prompt.read()
-            return prompt_text
+            with open(file_path, "r", encoding="utf-8") as file:
+                return file.read()
         except FileNotFoundError:
-            print(f"Prompt file not found: {self.prompt_path}")
-            return None
+            print(f"File not found: {file_path}")
+        except IOError as e:
+            print(f"Error reading file {file_path}: {e}")
+        return None
 
-    def generate_html(self, article_text: str) -> typing.Union[str, None]:
-        prompt = self.read_prompt() + article_text
+    def read_article(self) -> typing.Optional[str]:
+        """
+        Reads the article content from the specified file.
+
+        :return: Article text or None if the file is not found or cannot be read.
+        """
+        return self._read_file(self.article_path)
+
+    def read_prompt(self) -> typing.Optional[str]:
+        """
+        Reads the prompt content from the specified file.
+
+        :return: Prompt text or None if the file is not found or cannot be read.
+        """
+        return self._read_file(self.prompt_path)
+
+    def generate_html(self, article_text: str) -> typing.Optional[str]:
+        """
+        Generates HTML content by combining the prompt and the article text and sending it to OpenAI for processing.
+
+        :param article_text: The article content to be included in the HTML generation.
+        :return: The generated HTML content or None if generation fails.
+        """
+        prompt = self.read_prompt() + article_text if self.read_prompt() else article_text
         if prompt:
             try:
                 client = OpenAI()
                 completion = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "user", "content": prompt},
-                    ],
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": prompt}],
                 )
-                print(completion.choices[0].message.content[1:-1])
-                return completion.choices[0].message.content
-            except Exception as exception:
-                print(f"Error when generating html: {exception}")
+                generated_content = completion.choices[0].message.content.strip("```html").strip("```").strip()
+                print(generated_content)
+                return generated_content
+            except Exception as e:
+                print(f"Error generating HTML: {e}")
         return None
 
     def save_html(self, html_content: str) -> None:
+        """
+        Saves the generated HTML content to the specified output file.
+
+        :param html_content: The HTML content to be saved.
+        """
         try:
             with open(self.output_path, "w", encoding="utf-8") as file:
                 file.write(html_content)
-        except IOError:
-            print(f"Error when saving html: {self.output_path}")
+        except IOError as e:
+            print(f"Error saving HTML to {self.output_path}: {e}")
 
     def process_article(self) -> None:
+        """
+        Processes the article by reading its content, generating HTML, and saving the result.
+        """
         article_text = self.read_article()
         if article_text:
-            html_content = self.generate_html(article_text).strip("```html").strip("```").strip()
+            html_content = self.generate_html(article_text)
             if html_content:
                 self.save_html(html_content)
+            else:
+                print("Failed to generate HTML content.")
+        else:
+            print("Failed to read the article.")
+
