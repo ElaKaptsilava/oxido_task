@@ -1,6 +1,8 @@
 import typing
+
 import openai
 from openai import OpenAI
+
 from .setup import PROMPT_PATH, ARTICLE_PATH, OPENAI_API_KEY, OUTPUT_PATH
 
 
@@ -44,14 +46,6 @@ class ArticleHtmlGenerator:
         except IOError as e:
             print(f"Error reading file {file_path}: {e}")
         return None
-
-    def read_article(self) -> typing.Optional[str]:
-        """
-        Reads the article content from the specified file.
-
-        :return: Article text or None if the file is not found or cannot be read.
-        """
-        return self._read_file(self.article_path)
 
     def read_prompt(self) -> typing.Optional[str]:
         """
@@ -99,7 +93,7 @@ class ArticleHtmlGenerator:
         """
         Processes the article by reading its content, generating HTML, and saving the result.
         """
-        article_text = self.read_article()
+        article_text = self._read_file(self.article_path)
         if article_text:
             html_content = self.generate_html(article_text)
             if html_content:
@@ -108,4 +102,3 @@ class ArticleHtmlGenerator:
                 print("Failed to generate HTML content.")
         else:
             print("Failed to read the article.")
-
